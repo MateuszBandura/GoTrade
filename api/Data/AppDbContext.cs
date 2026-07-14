@@ -13,5 +13,26 @@ public class AppDbContext : IdentityDbContext<AppUser>
     {
     }
 
-    // public DbSet<Trade> Trades { get; set; }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        // AppUser
+        builder.Entity<AppUser>()
+                .HasIndex(u => u.NormalizedEmail)
+                .IsUnique();
+
+        // Trainer
+        builder.Entity<Trainer>()
+                .Property(t => t.Team)
+                .HasConversion<string>();
+
+        builder.Entity<Trainer>()
+                .HasOne(t => t.User)
+                .WithOne(u => u.Trainer)
+                .HasForeignKey<Trainer>(t => t.Id);
+
+    }
+    
+    public DbSet<Trainer> Trainers { get; set; }
 }

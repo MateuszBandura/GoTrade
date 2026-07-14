@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Entities;
@@ -11,4 +12,7 @@ namespace api.Entities;
 //   public string? Team { get; set; }           // Mystic / Valor / Instinct
 public class AppUser : IdentityUser
 {
+    
+    [JsonIgnore]
+    public Trainer Trainer { get; set; } = null!;
 }

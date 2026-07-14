@@ -1,4 +1,3 @@
-using api.Data;
 using api.DTOs;
 using api.Entities;
 using api.Extensions;
@@ -19,7 +18,11 @@ public class AccountController(UserManager<AppUser> userManager,
         var user = new AppUser
         {
             UserName = dto.Username,
-            Email = dto.Email
+            Email = dto.Email,
+            Trainer = new Trainer
+            {
+                FriendCode = dto.FriendCode
+            }
         };
 
         var result = await userManager.CreateAsync(user, dto.Password);
@@ -35,7 +38,7 @@ public class AccountController(UserManager<AppUser> userManager,
         if (user is null) return Unauthorized("Invalid credentials");
 
         var result = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
-        if(!result.Succeeded) return Unauthorized("Invaild credentials");
+        if(!result.Succeeded) return Unauthorized("Invalid credentials");
 
         return user.ToDto(tokenService);
     }
