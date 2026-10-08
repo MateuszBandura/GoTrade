@@ -485,5 +485,6 @@ $RECYCLE.BIN/
 api/appsettings.json
 api/*.db*
 Notes.txt
+NotesDB.txt
 
 .vscode

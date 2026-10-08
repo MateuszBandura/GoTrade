@@ -32,7 +32,38 @@ public class AppDbContext : IdentityDbContext<AppUser>
                 .WithOne(u => u.Trainer)
                 .HasForeignKey<Trainer>(t => t.Id);
 
+        // Pokemon
+        builder.Entity<Pokemon>()
+                .HasIndex(p => new { p.DexNumber, p.FormCode })
+                .IsUnique();
+
+        // Costume
+        builder.Entity<Costume>()
+                .HasIndex(c => c.Code)
+                .IsUnique();
+
+        // PokemonCostume (M:N junction with a payload column)
+        builder.Entity<PokemonCostume>()
+                .HasKey(pc => new { pc.PokemonId, pc.CostumeId });
+
+        builder.Entity<PokemonCostume>()
+                .HasOne(pc => pc.Pokemon)
+                .WithMany(p => p.PokemonCostumes)
+                .HasForeignKey(pc => pc.PokemonId);
+
+        builder.Entity<PokemonCostume>()
+                .HasOne(pc => pc.Costume)
+                .WithMany(c => c.PokemonCostumes)
+                .HasForeignKey(pc => pc.CostumeId);
+
+        builder.Entity<PokemonCostume>()
+                .Property(pc => pc.SpriteCode)
+                .HasConversion<string>();
+
     }
-    
+
     public DbSet<Trainer> Trainers { get; set; }
+    public DbSet<Pokemon> Pokemon { get; set; }
+    public DbSet<Costume> Costumes { get; set; }
+    public DbSet<PokemonCostume> PokemonCostumes { get; set; }
 }
