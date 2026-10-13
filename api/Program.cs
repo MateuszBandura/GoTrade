@@ -1,6 +1,7 @@
 
 using System.Text;
 using api.Data;
+using api.Data.Import;
 using api.Entities;
 using api.Interfaces;
 using api.Services;
@@ -13,7 +14,7 @@ namespace api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -40,11 +41,21 @@ public class Program
                 };
             });
         builder.Services.AddScoped<ITokenService, TokenService>();
+        builder.Services.AddScoped<PokemonImporter>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         //builder.Services.AddOpenApi(); // Add this line to add OpenAPI support (Useful for documentation)
 
         var app = builder.Build();
+
+        // `dotnet run -- import` -> run the importer and exit, the API does not start
+        if (args.Contains("import"))
+        {
+            using var scope = app.Services.CreateScope();
+            var importer = scope.ServiceProvider.GetRequiredService<PokemonImporter>();
+            await importer.RunAsync();
+            return;
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

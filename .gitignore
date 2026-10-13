@@ -486,5 +486,6 @@ api/appsettings.json
 api/*.db*
 Notes.txt
 NotesDB.txt
+NotesCS.txt
 
 .vscode
