@@ -1,4 +1,4 @@
-namespace api.Data.Import;
+namespace api.Data.Import.Json;
 
 // Shape of the pogoapi.net files we read. Unlike the game master (an array),
 // each file is ONE object keyed by dex number:
@@ -15,9 +15,3 @@ public class PogoApiPokemon
 
     public string Name { get; set; } = null!;
 }
-
-// The three files boiled down to what the importer needs
-public record PogoApiData(
-    Dictionary<int, string> Names,
-    HashSet<int> Released,
-    HashSet<int> Shiny);

@@ -1,4 +1,4 @@
-namespace api.Data.Import;
+namespace api.Data.Import.Parsed;
 
 // One (species, form) pair pulled out of a pokemonSettings template,
 // plus whatever we learn about it from other templates.
@@ -9,7 +9,7 @@ namespace api.Data.Import;
 //   IsTradable           true
 //   DynamaxAvailable     true
 //   GigantamaxAvailable  false
-public record ParsedForm(
+public record GameMasterForm(
     int DexNumber,
     string SpeciesCode,
     string FormCode,

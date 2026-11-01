@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
+using api.Data.Import.Parsed;
 
-namespace api.Data.Import;
+namespace api.Data.Import.Rules;
 
 public enum FormBucket { RealForm, Costume, Skip }
 
@@ -40,7 +41,7 @@ public static class FormClassification
         "GOURGEIST_SMALL", "GOURGEIST_LARGE", "GOURGEIST_SUPER",
     ];
 
-    public static FormBucket Classify(ParsedForm form)
+    public static FormBucket Classify(GameMasterForm form)
     {
         var fullName = $"{form.SpeciesCode}_{form.FormCode}";
 
@@ -49,7 +50,7 @@ public static class FormClassification
         return FormBucket.RealForm;
     }
 
-    private static bool IsCostume(ParsedForm form, string fullName)
+    private static bool IsCostume(GameMasterForm form, string fullName)
     {
         if (form.FormCode == "NORMAL") return false;
 

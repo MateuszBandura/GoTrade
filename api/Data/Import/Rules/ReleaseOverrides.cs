@@ -1,4 +1,4 @@
-namespace api.Data.Import;
+namespace api.Data.Import.Rules;
 
 // pogoapi.net released_pokemon.json is the base for Pokemon.IsReleased, but it stopped being
 // updated (last change: 2026-01-31). This list fixes what it doesn't know about.

@@ -1,4 +1,4 @@
-namespace api.Data.Import;
+namespace api.Data.Import.Json;
 
 // Classes that mirror the SHAPE of latest.json (PokeMiners game master).
 // They are not entities - nothing here goes to the database directly.
