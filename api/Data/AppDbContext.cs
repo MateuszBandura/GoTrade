@@ -60,10 +60,62 @@ public class AppDbContext : IdentityDbContext<AppUser>
                 .Property(pc => pc.SpriteCode)
                 .HasConversion<string>();
 
+        // TradeListing
+        builder.Entity<TradeListing>()
+                .Property(l => l.Kind)
+                .HasConversion<string>();
+
+        builder.Entity<TradeListing>()
+                .Property(l => l.MaxType)
+                .HasConversion<string>();
+
+        builder.Entity<TradeListing>()
+                .Property(l => l.Status)
+                .HasConversion<string>();
+
+        // Restrict everywhere: listings are never deleted, and nothing may delete them by cascade
+        builder.Entity<TradeListing>()
+                .HasOne(l => l.Trainer)
+                .WithMany()
+                .HasForeignKey(l => l.TrainerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<TradeListing>()
+                .HasOne(l => l.Pokemon)
+                .WithMany()
+                .HasForeignKey(l => l.PokemonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        // Composite FK: the DB rejects a costume this Pokemon doesn't have.
+        // Postgres skips the check when CostumeId is NULL
+        builder.Entity<TradeListing>()
+                .HasOne(l => l.PokemonCostume)
+                .WithMany()
+                .HasForeignKey(l => new { l.PokemonId, l.CostumeId })
+                .OnDelete(DeleteBehavior.Restrict);
+
+        // For matching: "active Haves / Wants of this Pokemon"
+        builder.Entity<TradeListing>()
+                .HasIndex(l => new { l.PokemonId, l.Kind, l.Status });
+
+        builder.Entity<TradeListing>()
+                .ToTable(t =>
+                {
+                    t.HasCheckConstraint(
+                        "CK_TradeListing_CostumeRequiresHasCostume",
+                        "\"CostumeId\" IS NULL OR \"HasCostume\" = true");
+
+                    t.HasCheckConstraint(
+                        "CK_TradeListing_HaveAttributesSet",
+                        "\"Kind\" <> 'Have' OR (\"IsShiny\" IS NOT NULL AND \"HasCostume\" IS NOT NULL " +
+                        "AND \"MaxType\" IS NOT NULL AND \"HasBackground\" IS NOT NULL)");
+                });
+
     }
 
     public DbSet<Trainer> Trainers { get; set; }
     public DbSet<Pokemon> Pokemon { get; set; }
     public DbSet<Costume> Costumes { get; set; }
     public DbSet<PokemonCostume> PokemonCostumes { get; set; }
+    public DbSet<TradeListing> TradeListings { get; set; }
 }

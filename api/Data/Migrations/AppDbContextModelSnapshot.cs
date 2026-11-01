@@ -304,6 +304,69 @@ namespace api.Data.Migrations
                     b.ToTable("PokemonCostumes");
                 });
 
+            modelBuilder.Entity("api.Entities.TradeListing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CostumeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool?>("HasBackground")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("HasCostume")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsShiny")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MaxType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PokemonId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TrainerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TrainerId");
+
+                    b.HasIndex("PokemonId", "CostumeId");
+
+                    b.HasIndex("PokemonId", "Kind", "Status");
+
+                    b.ToTable("TradeListings", t =>
+                        {
+                            t.HasCheckConstraint("CK_TradeListing_CostumeRequiresHasCostume", "\"CostumeId\" IS NULL OR \"HasCostume\" = true");
+
+                            t.HasCheckConstraint("CK_TradeListing_HaveAttributesSet", "\"Kind\" <> 'Have' OR (\"IsShiny\" IS NOT NULL AND \"HasCostume\" IS NOT NULL AND \"MaxType\" IS NOT NULL AND \"HasBackground\" IS NOT NULL)");
+                        });
+                });
+
             modelBuilder.Entity("api.Entities.Trainer", b =>
                 {
                     b.Property<string>("Id")
@@ -401,6 +464,32 @@ namespace api.Data.Migrations
                     b.Navigation("Costume");
 
                     b.Navigation("Pokemon");
+                });
+
+            modelBuilder.Entity("api.Entities.TradeListing", b =>
+                {
+                    b.HasOne("api.Entities.Pokemon", "Pokemon")
+                        .WithMany()
+                        .HasForeignKey("PokemonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("api.Entities.Trainer", "Trainer")
+                        .WithMany()
+                        .HasForeignKey("TrainerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("api.Entities.PokemonCostume", "PokemonCostume")
+                        .WithMany()
+                        .HasForeignKey("PokemonId", "CostumeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Pokemon");
+
+                    b.Navigation("PokemonCostume");
+
+                    b.Navigation("Trainer");
                 });
 
             modelBuilder.Entity("api.Entities.Trainer", b =>
