@@ -111,6 +111,59 @@ public class AppDbContext : IdentityDbContext<AppUser>
                         "AND \"MaxType\" IS NOT NULL AND \"HasBackground\" IS NOT NULL)");
                 });
 
+        // Trade
+        builder.Entity<Trade>()
+                .Property(t => t.Status)
+                .HasConversion<string>();
+
+        // Two FKs to the same table: EF can't guess which navigation goes with which FK,
+        // so each pair is spelled out. Restrict: trade history must never disappear by cascade
+        builder.Entity<Trade>()
+                .HasOne(t => t.Initiator)
+                .WithMany()
+                .HasForeignKey(t => t.InitiatorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Trade>()
+                .HasOne(t => t.Responder)
+                .WithMany()
+                .HasForeignKey(t => t.ResponderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Trade>()
+                .HasOne(t => t.InitiatorListing)
+                .WithMany()
+                .HasForeignKey(t => t.InitiatorListingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Trade>()
+                .HasOne(t => t.ResponderListing)
+                .WithMany()
+                .HasForeignKey(t => t.ResponderListingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Trade>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_Trade_DifferentTrainers",
+                    "\"InitiatorId\" <> \"ResponderId\""));
+
+        // TradeMessage
+        builder.Entity<TradeMessage>()
+                .HasOne(m => m.Trade)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(m => m.TradeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<TradeMessage>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+        // For loading a conversation in order
+        builder.Entity<TradeMessage>()
+                .HasIndex(m => new { m.TradeId, m.SentAt });
+
     }
 
     public DbSet<Trainer> Trainers { get; set; }
@@ -118,4 +171,6 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Costume> Costumes { get; set; }
     public DbSet<PokemonCostume> PokemonCostumes { get; set; }
     public DbSet<TradeListing> TradeListings { get; set; }
+    public DbSet<Trade> Trades { get; set; }
+    public DbSet<TradeMessage> TradeMessages { get; set; }
 }

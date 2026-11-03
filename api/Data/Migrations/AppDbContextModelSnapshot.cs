@@ -304,6 +304,54 @@ namespace api.Data.Migrations
                     b.ToTable("PokemonCostumes");
                 });
 
+            modelBuilder.Entity("api.Entities.Trade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InitiatorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("InitiatorListingId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ResponderId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ResponderListingId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InitiatorId");
+
+                    b.HasIndex("InitiatorListingId");
+
+                    b.HasIndex("ResponderId");
+
+                    b.HasIndex("ResponderListingId");
+
+                    b.ToTable("Trades", t =>
+                        {
+                            t.HasCheckConstraint("CK_Trade_DifferentTrainers", "\"InitiatorId\" <> \"ResponderId\"");
+                        });
+                });
+
             modelBuilder.Entity("api.Entities.TradeListing", b =>
                 {
                     b.Property<int>("Id")
@@ -365,6 +413,40 @@ namespace api.Data.Migrations
 
                             t.HasCheckConstraint("CK_TradeListing_HaveAttributesSet", "\"Kind\" <> 'Have' OR (\"IsShiny\" IS NOT NULL AND \"HasCostume\" IS NOT NULL AND \"MaxType\" IS NOT NULL AND \"HasBackground\" IS NOT NULL)");
                         });
+                });
+
+            modelBuilder.Entity("api.Entities.TradeMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TradeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("TradeId", "SentAt");
+
+                    b.ToTable("TradeMessages");
                 });
 
             modelBuilder.Entity("api.Entities.Trainer", b =>
@@ -466,6 +548,39 @@ namespace api.Data.Migrations
                     b.Navigation("Pokemon");
                 });
 
+            modelBuilder.Entity("api.Entities.Trade", b =>
+                {
+                    b.HasOne("api.Entities.Trainer", "Initiator")
+                        .WithMany()
+                        .HasForeignKey("InitiatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("api.Entities.TradeListing", "InitiatorListing")
+                        .WithMany()
+                        .HasForeignKey("InitiatorListingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("api.Entities.Trainer", "Responder")
+                        .WithMany()
+                        .HasForeignKey("ResponderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("api.Entities.TradeListing", "ResponderListing")
+                        .WithMany()
+                        .HasForeignKey("ResponderListingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Initiator");
+
+                    b.Navigation("InitiatorListing");
+
+                    b.Navigation("Responder");
+
+                    b.Navigation("ResponderListing");
+                });
+
             modelBuilder.Entity("api.Entities.TradeListing", b =>
                 {
                     b.HasOne("api.Entities.Pokemon", "Pokemon")
@@ -490,6 +605,25 @@ namespace api.Data.Migrations
                     b.Navigation("PokemonCostume");
 
                     b.Navigation("Trainer");
+                });
+
+            modelBuilder.Entity("api.Entities.TradeMessage", b =>
+                {
+                    b.HasOne("api.Entities.Trainer", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("api.Entities.Trade", "Trade")
+                        .WithMany("Messages")
+                        .HasForeignKey("TradeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sender");
+
+                    b.Navigation("Trade");
                 });
 
             modelBuilder.Entity("api.Entities.Trainer", b =>
@@ -517,6 +651,11 @@ namespace api.Data.Migrations
             modelBuilder.Entity("api.Entities.Pokemon", b =>
                 {
                     b.Navigation("PokemonCostumes");
+                });
+
+            modelBuilder.Entity("api.Entities.Trade", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }
